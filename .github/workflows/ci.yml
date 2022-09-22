@@ -1,28 +1,46 @@
-name: Clojure CI
+name: CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
-  build:
+  elisp:
+    name: "Emacs Lisp"
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - uses: ConorMacBride/install-package@v1
-      with:
-        choco: lein
-        apt: leiningen
-        brew: leiningen
+      - uses: ConorMacBride/install-package@v1
+        with:
+          apt: emacs
 
-    - name: Run tests
-      run: |
-        for i in clojure/*; do
-          pushd $i
-          lein test
-          popd
-        done
+      - name: Run tests
+        run: |
+          for i in emacs-lisp/*; do
+            pushd $i
+            emacs -batch -l ert -l *-test.el -f ert-run-tests-batch-and-exit
+            popd
+          done
+
+  clojure:
+    name: "Clojure"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ConorMacBride/install-package@v1
+        with:
+          apt: leiningen
+
+      - name: Run tests
+        run: |
+          for i in clojure/*; do
+            pushd $i
+            lein test
+            popd
+          done
